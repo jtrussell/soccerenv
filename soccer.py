@@ -108,30 +108,34 @@ class SoccerEnv(discrete.DiscreteEnv):
 
         player1_row, player1_column, player2_row, player2_column, player1_possession = s
 
+        # There's a change of possession if the player with the ball moves second.
+        is_change_of_possession = not is_first_to_act and player1_possession
+        collision_possession = not player1_possession if is_change_of_possession else player1_possession
+
         if a is SoccerEnv.Action.N:
             collision = player1_row == player2_row + 1 and player1_column == player2_column
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [max(player1_row - 1, 0), player1_column, player2_row, player2_column, player1_possession], False
         elif a is SoccerEnv.Action.E:
             collision = player1_row == player2_row and player1_column + 1 == player2_column
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [player1_row, min(player1_column + 1, SoccerEnv.max_column), player2_row, player2_column,
                         player1_possession], False
         elif a is SoccerEnv.Action.W:
             collision = player1_row == player2_row and player1_column == player2_column + 1
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [player1_row, max(player1_column - 1, 0), player2_row, player2_column, player1_possession], False
             pass
         elif a is SoccerEnv.Action.S:
             collision = player1_row + 1 == player2_row and player1_column == player2_column
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [min(player1_row + 1, SoccerEnv.max_row), player1_column, player2_row, player2_column,
                         player1_possession], False
@@ -145,30 +149,34 @@ class SoccerEnv(discrete.DiscreteEnv):
     def resolve_player2_action(s, a, is_first_to_act):
         player1_row, player1_column, player2_row, player2_column, player1_possession = s
 
+        # There's a change of possession if the player with the ball moves second.
+        is_change_of_possession = not is_first_to_act and not player1_possession
+        collision_possession = not player1_possession if is_change_of_possession else player1_possession
+
         if a is SoccerEnv.Action.N:
             collision = player1_row + 1 == player2_row and player1_column == player2_column
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, not is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [player1_row, player1_column, max(player2_row - 1, 0), player2_column, player1_possession], False
         elif a is SoccerEnv.Action.E:
             collision = player1_row == player2_row and player1_column == player2_column + 1
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, not is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [player1_row, player1_column, player2_row, min(player2_column + 1, SoccerEnv.max_column),
                         player1_possession], False
         elif a is SoccerEnv.Action.S:
             collision = player1_row == player2_row + 1 and player1_column == player2_column
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, not is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [player1_row, player1_column, min(player2_row + 1, SoccerEnv.max_row), player2_column,
                         player1_possession], False
         elif a is SoccerEnv.Action.W:
             collision = player1_row == player2_row and player1_column + 1 == player2_column
             if collision:
-                return [player1_row, player1_column, player2_row, player2_column, not is_first_to_act], True
+                return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
                 return [player1_row, player1_column, player2_row, max(player2_column - 1, 0), player1_possession], False
         elif a is SoccerEnv.Action.Stick:
