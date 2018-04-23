@@ -56,9 +56,9 @@ class SoccerEnv(discrete.DiscreteEnv):
         isd = np.zeros(num_states)
 
         for player1_row in range(SoccerEnv.num_rows):
-            for player1_column in range (SoccerEnv.num_columns):
+            for player1_column in range (1, SoccerEnv.num_columns - 1):
                 for player2_row in range (SoccerEnv.num_rows):
-                    for player2_column in range(SoccerEnv.num_columns):
+                    for player2_column in range(1, SoccerEnv.num_columns - 1):
 
                         # The players may not occupy the same state.
                         if player1_row == player2_row and player1_column == player2_column:
@@ -123,14 +123,16 @@ class SoccerEnv(discrete.DiscreteEnv):
             if collision:
                 return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
-                return [player1_row, min(player1_column + 1, SoccerEnv.max_column), player2_row, player2_column,
+                max_col = SoccerEnv.max_column if player1_possession else SoccerEnv.max_column - 1
+                return [player1_row, min(player1_column + 1, max_col), player2_row, player2_column,
                         player1_possession], False
         elif a is SoccerEnv.Action.W:
             collision = player1_row == player2_row and player1_column == player2_column + 1
             if collision:
                 return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
-                return [player1_row, max(player1_column - 1, 0), player2_row, player2_column, player1_possession], False
+                min_col = 0 if player1_possession else 1
+                return [player1_row, max(player1_column - 1, min_col), player2_row, player2_column, player1_possession], False
             pass
         elif a is SoccerEnv.Action.S:
             collision = player1_row + 1 == player2_row and player1_column == player2_column
@@ -164,7 +166,8 @@ class SoccerEnv(discrete.DiscreteEnv):
             if collision:
                 return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
-                return [player1_row, player1_column, player2_row, min(player2_column + 1, SoccerEnv.max_column),
+                max_col = SoccerEnv.max_column if not player1_possession else SoccerEnv.max_column - 1
+                return [player1_row, player1_column, player2_row, min(player2_column + 1, max_col),
                         player1_possession], False
         elif a is SoccerEnv.Action.S:
             collision = player1_row == player2_row + 1 and player1_column == player2_column
@@ -178,7 +181,8 @@ class SoccerEnv(discrete.DiscreteEnv):
             if collision:
                 return [player1_row, player1_column, player2_row, player2_column, collision_possession], True
             else:
-                return [player1_row, player1_column, player2_row, max(player2_column - 1, 0), player1_possession], False
+                min_col = 0 if not player1_possession else 1
+                return [player1_row, player1_column, player2_row, max(player2_column - 1, min_col), player1_possession], False
         elif a is SoccerEnv.Action.Stick:
             return s, False
         else:
